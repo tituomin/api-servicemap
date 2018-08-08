@@ -7,16 +7,15 @@ info:
       The Servicemap API provides categorized data on services, both public and private,
       and service locations within a city or metropolitan area.
 
-      The API provides data in the JSON format.
+      The API provides data in the JSON format, in a RESTful fashion.
 
-      The two most important models provided by the API are (1) units,
-      which are concrete physical locations or service points which
+      The two most important resources provided by the API are (1) units,
+      which are concrete physical locations, service points, which
       provide services to citizens, and (2) services, which are the
       categories of services that can be provided by units.
 
-      Several fields are multilingual. These are implemented as object with each language variant
-      as property. In this specification each multilingual field has (fi,sv,en) property triplet as
-      example.
+      Several fields are multilingual. These are implemented as objects with each language variant
+      as property.
 
   termsOfService: (depends on data provider)
   version: v2
@@ -102,12 +101,47 @@ definitions:
       name:
         description: The name of the unit [multilingual]
         type: object
+
+      location:
+        type: object
+        properties:
+          type:
+            type: string
+            description: Currently always \"Point\"
+          coordinates:
+            type: array
+            description: The unit\'s coordinates in WGS84.
+            items:
+              type: float
+              description: a coordinate
+
+      services:
+        "$ref": "#/definitions/service"
+        description: The primary classification categories for the unit; the services provided by the unit. Use the include=services query parameter to get more detailed qualifications of how the unit provides the services.
+
+      service_nodes:
+        "$ref": "#/definitions/service_node"
+        description: The hierarchical service nodes which the unit corresponds to; the secondary classification categories for the unit.
+      root_service_nodes:
+        type: array
+        description: The unique roots of the service node hierarchy for this unit\'s service nodes, as integer identifiers
+        items:
+          type: integer
+
       street_address:
         description: The first part of the street address, containing the street name and building number. This address should be used for locating the unit geographically, not for sending mail.
         type: string
+      address_zip:
+        description: The zip code for the street address
+        type: string
+      municipality:
+        "$ref": "#/definitions/administrative_division"
+        description: The municipality in which the unit is located
+
       address_postal_full:
         description: The full postal address, which should be used for sending mail, not for locating the unit.
         type: string
+
       email:
         description: The main email address
         type: string
@@ -123,21 +157,28 @@ definitions:
       www:
         description: The main home page, or the most relevant site available for the unit
         type: string
-      identifiers:
-        type: array
-        items:
-          type: object
-          properties:
-            namespace:
-              type: string
-            value:
-              type: string
+
       description:
         type: string
         description: A textual description of the unit, provided for the end user
       short_description:
         type: string
         description: A rarely used field containing a shorter description of the unit
+      connections:
+        type: array
+        items:
+          "$ref": "#/definitions/unit_connection"
+
+      # keywords:
+      #   type: object
+      #   description: A collection of multilingual additional keywords that are mainly used to make the full text search match relevant additional words for the unit.
+      #   properties:
+      #     language_key:
+      #       type: array
+      #       items:
+      #         type: string
+      #         description: A search keyword
+
       department:
         "$ref": '#/definitions/department'
         description: The immediate organizational subdivision that is responsible for this unit
@@ -156,6 +197,7 @@ definitions:
       organizer_business_id:
         type: string
         description: If the organization providing the service is different from the owning organization in the department field, eg. when a municipality purchases the service from a private business, the organizer\'s business id is provided here
+
       picture_url:
         type: string
         description: A picture, usually a photograph of the unit or the building it is located in
@@ -180,10 +222,16 @@ definitions:
           description:
             type: object
             description: An end-user facing description of the contract type, [multilingual]
-      connections:
-        type: array
-        items:
-          "$ref": "#/definitions/unit_connection"
+
+      accessibility_phone:
+        type: string
+        description: The telephone number through which patrons can ask about the unit\'s accessibility
+      accessibility_email:
+        type: string
+        description: An email address number through which patrons can ask about the unit\'s accessibility
+      accessibility_www:
+        type: string
+        description: A link to a site providing details about the unit\'s accessibility
       accessibility_properties:
         type: array
         items:
@@ -195,9 +243,32 @@ definitions:
             value:
               type:
                 string
+      accessibility_viewpoints:
+        type: object
+        description: A summary of the unit\'s accessibility for different accessibility viewpoints. The accessibility viewpoints are user profiles, eg. "using a wheelchair", "using a hearing aid". If the value for a coded viewpoint is red, the unit is not accessible for a user with the specified profile.
+
+      created_time:
+        type: string
+        description: The date and time when the entry for the unit was created in the master database, in ISO 8601.
+      last_modified_time:
+        type: string
+        description: The date and time when the entry for the unit was last modified in the API, in ISO 8601.
+
+      data_source:
+        type: string
+        description: An identifier for the master database for the unit data
+      identifiers:
+        type: array
+        items:
+          type: object
+          properties:
+            namespace:
+              type: string
+            value:
+              type: string
           
   unit_connection:
-    title: Unit Connection
+    title: Unit connection
     type: object
     description: A flexible, structured piece of information, which can contain contact details, links, textual notices, and opening hours.
     properties:
@@ -218,6 +289,11 @@ definitions:
     title: Department
     type: object
     description: A subdivision of a hierarchical organisation, or the root of the hierarchy, representing the whole organization
+
+  administrative_division:
+    title: Administrative division
+    type: object
+    description: A geographic administrative division, such as a municipality, a neighborhood/district, or an area for which a specific unit provides services
 
 paths:
   /unit/:
