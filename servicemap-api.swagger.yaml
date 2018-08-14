@@ -4,18 +4,18 @@ swagger: '2.0'
 info:
   title: Servicemap API
   description: |-
-      The Servicemap API provides categorized data on services, both public and private,
-      and service locations within a city or metropolitan area.
+      The Servicemap API provides categorized data on services, both public and private, and service locations within a city or metropolitan area.
 
       The API provides data in the JSON format, in a RESTful fashion.
 
-      The two most important resources provided by the API are (1) units,
-      which are concrete physical locations, service points, which
-      provide services to citizens, and (2) services, which are the
-      categories of services that can be provided by units.
+      The two most important resources provided by the API are
 
-      Several fields are multilingual. These are implemented as objects with each language variant
-      as property.
+      1. *units*, concrete physical locations, service points, which provide services to citizens and
+      2. *services*, which are the categories of services that can be provided by units.
+
+      There are several more supporting resources linked to units in one way or another, and they are all specified in this documentation.
+
+      Several fields are multilingual. These are implemented as objects with each language variant as property.
 
   termsOfService: (depends on data provider)
   version: v2
@@ -25,7 +25,6 @@ basePath: /servicemap/v2
 
 schemes:
   - https
-  - http
 
 produces:
   - application/json
@@ -46,16 +45,16 @@ tags:
 
 
 parameters:
-  page_param:
+  page_param: #FIXME ONLY PARAM
     name: page
     in: query
-    description: request particular page in paginated results
+    description: Request particular page in paginated results
     required: false
     type: integer
   pagesize_param:
     name: page_size
     in: query
-    description: request that server delivers page_size results in response
+    description: Request that server delivers page_size results in response
     required: false
     type: integer
   include_param:
@@ -64,7 +63,7 @@ parameters:
     type: array
     items:
       type: string
-    description: Embed the complete content of given reference-type fields directly into the response, otherwise they are returned as identifiers.
+    description: Embed the complete content of given reference-type fields directly into the response, otherwise they are returned as identifiers. Separate field names by commas.
   unit_q_param:
     name: text
     in: query
@@ -74,11 +73,7 @@ parameters:
   unit_bbox_param:
     name: bbox
     in: query
-    type: array
-    items:
-      type: string
-    minItems: 4
-    maxItems: 4
+    type: string
     description: Search for events that are within this bounding box. Decimal coordinates are given in order west, south, east, north. Period is used as decimal separator.
   # FIXME: add all missing filters to units
 
@@ -112,7 +107,7 @@ definitions:
             type: array
             description: The unit\'s coordinates in WGS84.
             items:
-              type: float
+              type: number
               description: a coordinate
 
       services:
@@ -135,7 +130,7 @@ definitions:
         description: The zip code for the street address
         type: string
       municipality:
-        "$ref": "#/definitions/administrative_division"
+        type: administrative_division
         description: The municipality in which the unit is located
 
       address_postal_full:
@@ -169,15 +164,15 @@ definitions:
         items:
           "$ref": "#/definitions/unit_connection"
 
-      # keywords:
-      #   type: object
-      #   description: A collection of multilingual additional keywords that are mainly used to make the full text search match relevant additional words for the unit.
-      #   properties:
-      #     language_key:
-      #       type: array
-      #       items:
-      #         type: string
-      #         description: A search keyword
+      keywords:
+        type: object
+        description: A collection of multilingual additional keywords that are mainly used to make the full text search match relevant additional words for the unit.
+        properties:
+          language_key:
+            type: array
+            items:
+              type: string
+              description: A search keyword
 
       department:
         "$ref": '#/definitions/department'
@@ -285,10 +280,99 @@ definitions:
       contact_person:
         type: string
 
+  service:
+    title: Service
+    type: object
+    description: The primary category of services that the units can provide. A single service can be provided by 1..n units, and a single unit can provide 1..n services.
+    properties:
+      name:
+        type: object
+        description: Multilingual name of the service, keyed by language code
+      id:
+        type: integer
+        description: Primary, unique and persistent id for the service
+      period_enabled:
+        type: boolean
+        description: Some units provide some services only during specified periods of time. This is currently used for schools, which may provide the service of teaching a specific language only during one school year, but not during the next. If this attribute is true, this unit--service relationship can have a period specification connected to it.
+      clarification_enabled:
+        type: boolean
+        description: Some units provide some services in a variation that is specified in a clarification. If this attribute is true, the unit--service relationship can have a clarification connected to it.
+      keywords:
+        type: object
+        description: A multilingual field containing additional words which match this service in a full text search.
+      unit_count:
+        type: object
+        description: How many units provide this service
+        properties:
+          total:
+            type: integer
+            description: The total number of units, without any filters
+
   department:
     title: Department
     type: object
     description: A subdivision of a hierarchical organisation, or the root of the hierarchy, representing the whole organization
+    properties:
+      id:
+        type: string
+        description: A UUID primary identifier
+      name:
+        type: object
+        description: The department name [multilingual]
+      abbr:
+        type: string
+        description: An abbreviated name
+      street_address:
+        type: string
+        description: A street address used to physically locate the department
+      address_city:
+        type: string
+        description: The city where the street address is situated
+      address_zip:
+        type: string
+        description: The zip code of the street address
+      address_postal_full:
+        type: string
+        description: The address used for sending mail to the department
+      www:
+        type: string
+        desription: The WWW address as a URL for a home page or other main web site of the department
+      phone:
+        type: string
+        description: Telephone number
+      parent:
+        type: a reference to a department resource
+        description: The parent of this department in the organizational hierarchy
+      business_id:
+        type: string
+        description: A Business Identity Code from the Business Information System, provided by the Finnish Patent and Registration Office with the Finnish Tax Administration
+      oid:
+        type: string
+        description: A secondary identifier for the organization
+      organization_type:
+        type: string
+        description: Whether this department is part of a private enterprice, public organization, or other kind of organization. # FIXME enumerate
+      level:
+        type: integer
+        description: The depth of the department inside the organizational hierarchy. Level 0 means that the department identifies the main organization, or is the root of the organizations hierarchy. Level 1 means that the department is one level down in the hierarchy and so on.
+      municipality:
+        type: reference to an administrative_division resource
+        description: If the department is part of a municipal organization, this fields specifies the municipality
+
+  service_node:
+    title: Service Node
+    type: object
+    description: |
+      This is a secondary category used to classify the services that a unit provides. Service nodes are only to be used when a browsable hierarchy of services is required. Otherwise prefer service resources, because
+      1. service nodes contain duplicates in different branches of the hierarchy and
+      2. service nodes are fully based on services; a service node is simply an aggregation of several services
+    properties:
+      id:
+        type: integer
+        description: Main identifier
+      # children:
+      #   type: array
+      #   description: The service node
 
   administrative_division:
     title: Administrative division
@@ -298,9 +382,157 @@ definitions:
 paths:
   /unit/:
     get:
-      summary: foo bar
+      operationId: Retrieve unit list
+      summary: Return a list of units
       description: |
-        Ain\'t it nice
+        Without parameters, return a list of all units. With query
+        parameters, the set of returned units is filtered and the
+        structure of returned units can be fine tuned.
+      tags:
+        - unit
+      parameters:
+        - $ref: "#/parameters/page_param"
+        - $ref: "#/parameters/pagesize_param"
+        - $ref: "#/parameters/include_param"
+        - name: services
+          in: query
+          type: string
+          description: A comma-separated list of service ids to be used as a filter
+        - name: id
+          in: query
+          type: string
+          description: A comma-separated list of one or more unit ids to be used as a filter
+          required: false
+        - name: lat
+          in: query
+          type: string
+          description: A latitude coordinate to be used as part of a location filter
+          required: false
+        - name: lon
+          in: query
+          type: string
+          description: A longitude coordinate to be used as part of a location filter
+          required: false
+        - name: distance
+          in: query
+          type: string
+          description: A distance radius filter to be used as part of a location filter along with lat and lon
+          required: false
+        - name: municipality
+          in: query
+          type: string
+          description: A comma-separated list of one or more municipality ids. The returned units will be located within the municipalities\' boundaries. The municipality ids are either municipality names in Finnish, or full OCD IDs of the form ocd-division/country\:fi/kunta\:helsinki (URL encoded) See the [OpenCivicData Site](http://opencivicdata.readthedocs.io/en/latest/ocdids.html) for more information
+          required: false
+        - name: provider_type
+          in: query
+          type: string
+          description: A comma-separated list of unit provider types to be used as a filter
+          required: false
+        - name: provider_type__not
+          in: query
+          type: string
+          description: A comma-separated list of unit provider types to be used as an exclusion filter
+          required: false
+        - name: level
+          in: query
+          type: string
+          description: A string value from a predefined list, which acts as a shorthand filter that aggregates several thematic services together, for example \"most common public services\" # FIXME: list values
+          required: false
+        - name: service_nodes
+          in: query
+          type: string
+          description: A comma-separated list of service node ids to be used as a filter. Prefer the *services* parameter unless service nodes specifically needed
+        - name: exclude_service_nodes # FIXME inconsistent
+          in: query
+          type: string
+          description: A comma-separated list of service node ids to be used as an exclusion filter
+        - name: division
+          in: query
+          type: string
+          description: A comma-separated list of administrative divisions to be used as a filter. Use either full division ids or shorthands of the form muni/type\:id
+          required: false
+        - $ref: "#/parameters/unit_bbox_param"
+        - name: bbox_srid
+          in: query
+          type: string
+          description: An SRID coordinate reference system identifier which specifies the coordinate system used in the bbox parameter
+        - name: geometry
+          in: query
+          type: string
+          description: If parameter value is either true or 1, return the complex geometry of the unit. Most units only have point type geometries, which are returned in the location field by default. Some however have polygon type geometries, eg. skiing tracks or outdoor areas. These complex geometries must be explicitly requested with this parameter.
+        # - name: maintenance_organization FIXME: no in use yet -- awaiting observations
+        #   in: query
+        #   type: string
+        #   description: A highly specialized query parameter used for filtering based on the 
+
       responses:
         200:
-          description: List of units
+          description: List of units, paginated
+          schema:
+            type: object
+            properties:
+              results:
+                type: array
+                items:
+                  $ref: '#definitions/unit'
+              count:
+                type: integer
+                description: Total amount of returned units
+              next:
+                type: string
+                description: A link to the next page of results
+              previous:
+                type: string
+                description: A link to the previous page of results
+  /unit/{id}/:
+    get:
+      summary: Retrieve single unit by id
+      operationId: Retrieve unit
+      tags:
+      - unit
+      responses:
+        200:
+          description: Single unit object
+          schema:
+            $ref: '#/definitions/unit'
+      parameters:
+      - name: id
+        in: path
+        type: string
+        description: Unit identifier as defined in unit schema
+        required: true
+
+  /service/{id}/:
+    get:
+      summary: Retrieve single service by id
+      operationId: Retrieve service
+      tags:
+      - services
+      responses:
+        200:
+          description: Single service object
+          schema:
+            $ref: '#/definitions/service'
+      parameters:
+      - name: id
+        in: path
+        type: string
+        description: Service identifier as defined in service schema
+        required: true
+
+  /service/:
+    get:
+      operationId: Retrieve service
+      summary: Return a list of services
+      description: |
+        Without parameters, return a list of all services.
+      tags:
+        - services
+      parameters:
+        - $ref: "#/parameters/page_param"
+        - $ref: "#/parameters/pagesize_param"
+        - $ref: "#/parameters/include_param"
+        - name: id
+          in: query
+          type: string
+          description: A comma-separated list of service ids to filter by
