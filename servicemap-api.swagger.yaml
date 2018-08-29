@@ -529,6 +529,17 @@ definitions:
         type: object
         description: The name of the street, multilingual
 
+  accessibility_rule:
+    title: Accessibility rules
+    type: object
+    properties:
+      rules:
+        type: object
+        description: An object consisting of boolean expressions that are used to calculate whether a given unit satisfies the accessibility requirements of a given user
+      messages:
+        type: array
+        description: An array of UI message strings (multilingual) referred to in the rules section above (messages are referred to using array indices).
+
   common_collection:
     title: Common fields in all list responses
     type: object
