@@ -436,6 +436,98 @@ definitions:
     title: Administrative division
     type: object
     description: A geographic administrative division, such as a municipality, a neighborhood/district, or an area for which a specific unit provides services
+    properties:
+      id:
+        type: integer
+        description: Internal id of the division (prefer the ocd id)
+      origin_id:
+        type: string
+        description: The id of the division in the master database it was imported from
+      ocd_id:
+        type: string
+        description: A full OCD ID of the form ocd-division/country\:fi/kunta\:helsinki (URL encoded) See the [OpenCivicData Site](http://opencivicdata.readthedocs.io/en/latest/ocdids.html) for more information 
+      service_point_id:
+        type: string
+        description: An id of a service point which provides services for or is otherwise connected to this division
+      start:
+        type: string
+        description:  Some divisions might be only valid during some time period. (E.g. yearly school districts in Helsinki). The "start" and "end" fields provide the (approximate) time period for which this division is valid.
+      end:
+        type: string
+        description: See "start"
+      type:
+        type: string
+        description: A reference to the type of the division
+      parent:
+        type: string
+        description: Some divisions form a hierarchy, where smaller divisions are administratively part of larger ones. This field gives the parent of the division in such a hierarchy.
+      municipality:
+        type: string
+        description: A reference to the municipality, if any, this division belongs to
+      name:
+        type: object
+        description: A multilingual field giving the name of the division
+
+  administrative_division_type:
+    title: Administrative division type
+    type: object
+    description: All the administrative divisions have types, which are represented as a separate resource
+    properties:
+      id:
+        type: integer
+        description: Internal id of the division type
+      type:
+        type: string
+        description: A mnemonic identifier used for eg. filtering administrative divisions
+      name:
+        type: string
+        description: A human-readable name for the division type
+
+  address:
+    title: Address
+    type: object
+    properties:
+      number:
+        type: string
+        description: The building number in the street address
+      number_end:
+        type: string
+        description: If the address is a combination of two or more old addressess (a larger building where several smaller ones used to be), the address numbers are given as a range of number - number_end
+      letter:
+        type: string
+        description: If a single old address has been divided into two or more new addresses (several small buildings where a large one used to be), the parts are denoted with different letters after the address number
+      modified_at:
+        type: string
+        description: Datetime of last modification in this API
+      location:
+        type: object
+        description: A GeoJSON coordinate for this address
+        properties:
+          type:
+            type: string
+            description: Usually Point, the type of the coordinates
+          coordinates:
+            type: array
+            description: An array of floats forming the coordinates
+      street:
+        $ref: "#/definitions/street"
+
+  street:
+    title: Street
+    type: object
+    properties:
+      id:
+        type: integer
+        description: An internal id of the street
+      modified_at:
+        type: string
+        description: A datetime of last modification in this API
+      municipality:
+        type: string
+        description: The municipality where this street is located
+      name:
+        type: object
+        description: The name of the street, multilingual
 
   common_collection:
     title: Common fields in all list responses
