@@ -10,8 +10,8 @@ info:
 
       The two most important resources provided by the API are
 
-      1. *units*, concrete physical locations, service points, which provide services to citizens and
-      2. *services*, which are the categories of services that can be provided by units.
+      1. **units**, concrete physical locations which provide services to citizens, and
+      2. **services**, which are the categories of services that can be provided by units.
 
       There are several more supporting resources linked to units in one way or another, and they are all specified in this documentation.
 
@@ -37,7 +37,7 @@ tags:
   - name: organization
     description: Retrieve information about organizations providing services
   - name: search
-    description: Fulltext search through units, services, and also street addresses
+    description: Full text search through units, services, and also street addresses
   - name: accessibility
     description: Get rules for calculating accessibility shortcomings of a unit
   - name: geography
@@ -182,7 +182,7 @@ definitions:
           root_department:
             type: integer
             description: Departments are hierarchical; this is a shortcut to the root of the organization hierarchy of this unit
-            "$ref": '#definitions/department'
+            "$ref": '#/definitions/department'
           provider_type:
             type: string
             description: A description of how the service is provided by the organization providing it. One of a predefined set of values. # FIXME: describe values
@@ -408,12 +408,12 @@ definitions:
         description: The address used for sending mail to the department
       www:
         type: string
-        desription: The WWW address as a URL for a home page or other main web site of the department
+        description: The WWW address as a URL for a home page or other main web site of the department
       phone:
         type: string
         description: Telephone number
       parent:
-        type: id
+        type: string
         description: The parent of this department in the organizational hierarchy
       business_id:
         type: string
@@ -559,7 +559,7 @@ paths:
                   results:
                     type: array
                     items:
-                      $ref: '#definitions/unit'
+                      $ref: '#/definitions/unit'
               - $ref: "#/definitions/common_collection"
 
   /unit/{id}/:
@@ -600,7 +600,7 @@ paths:
 
   /service/:
     get:
-      operationId: Retrieve service
+      operationId: Retrieve service list
       summary: Return a list of services
       description: |
         Without parameters, return a list of all services.
@@ -614,3 +614,15 @@ paths:
           in: query
           type: string
           description: A comma-separated list of service ids to filter by
+      responses:
+        200:
+          description: List of services, paginated
+          schema:
+            type: object
+            allOf:
+              - properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/definitions/service'
+              - $ref: '#/definitions/common_collection'
