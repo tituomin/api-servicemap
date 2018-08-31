@@ -754,3 +754,79 @@ paths:
                     items:
                       $ref: '#/definitions/service'
               - $ref: '#/definitions/common_collection'
+
+  /service_node/{id}/:
+    get:
+      summary: Retrieve single service node by id. Always prefer the **service** endpoint unless service nodes are specifically required.
+      operationId: Retrieve service node
+      tags:
+      - service
+      responses:
+        200:
+          description: Single service node object
+          schema:
+            $ref: '#/definitions/service_node'
+      parameters:
+      - name: id
+        in: path
+        type: string
+        description: Service identifier as defined in service_node schema
+        required: true
+
+  /service_node/:
+    get:
+      operationId: Retrieve service node list
+      summary: Return a list of service nodes. Always prefer the **service** endpoint unless service nodes are specifically required.
+      description: |
+        Without parameters, return a list of all service nodes.
+      tags:
+        - service
+      parameters:
+        - $ref: "#/parameters/page_param"
+        - $ref: "#/parameters/pagesize_param"
+        - $ref: "#/parameters/include_param"
+        - name: id
+          in: query
+          type: string
+          description: A comma-separated list of service_node ids to filter by
+        - name: ancestor
+          in: query
+          type: string
+          description: The id of a service_node whose descendants are to be returned in the response
+      responses:
+        200:
+          description: List of service nodess, paginated
+          schema:
+            type: object
+            allOf:
+              - properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/definitions/service_node'
+              - $ref: '#/definitions/common_collection'
+
+  /department/:
+    get:
+      operationId: Retrieve list of departments
+      summary: Return a list of departments
+      description: Return a list of all departments
+      tags:
+        - organization
+      parameters:
+        - $ref: "#/parameters/page_param"
+        - $ref: "#/parameters/pagesize_param"
+        - $ref: "#/parameters/include_param"
+
+  /department/{id}/:
+    get:
+      operationId: Retrieve a single department
+      summary: Return a single department
+      description: Return a single department
+      tags:
+        - organization
+      parameters:
+        - name: include_hierarchy
+          type: string
+          description: With a value other than *no*, *false*, or *0*, or with an empty value, include the whole descendant hierarchy beginning at this department in the response.
+
