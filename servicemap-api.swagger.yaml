@@ -509,6 +509,9 @@ definitions:
           coordinates:
             type: array
             description: An array of floats forming the coordinates
+            items:
+              type: integer
+              description: A single term of the coordinate
       street:
         $ref: "#/definitions/street"
 
@@ -535,10 +538,32 @@ definitions:
     properties:
       rules:
         type: object
-        description: An object consisting of boolean expressions that are used to calculate whether a given unit satisfies the accessibility requirements of a given user
+        description: |
+          An object consisting of boolean expressions that are used to calculate whether a given unit satisfies the accessibility requirements of a given user.
+
+          The **top level keys** of the object encode users\' accessibility profiles, which consist of a number and a letter. The numbers represent
+
+          1. A wheelchair user
+          2. Someone with reduced mobility
+          3. A rollator user
+          4. Someone pushing a stroller
+          5. Someone who is visually impaired
+          6. Someone who is using a hearing aid
+
+          The letters represent the person\'s mode of transportation
+
+          A. Without a vehicle or using public transportation
+          B. With their own car
+          C. With a car and a separate driver
+
+          The values of the object form a boolean expression tree, which is evaluated using the accessibility properties data of a unit. Whenever a primitive boolean expression or a compound one with a non-null **msg** field is evaluated as **true**, we have found a shortcoming or problem for this user when accessing this unit. The corresponding message from the **messages** array (see below) must be displayed to the user. A primitive exporession is evaluated by comparing the relevant accessibility property value using the operator to the value given in the expression. Usually this is an equality comparison between the first operand (a unit accessibility property identifier, and a second one (a possible value for the property)).
+          
       messages:
         type: array
         description: An array of UI message strings (multilingual) referred to in the rules section above (messages are referred to using array indices).
+        items:
+          type: object
+          description: A multilingual object
 
   common_collection:
     title: Common fields in all list responses
