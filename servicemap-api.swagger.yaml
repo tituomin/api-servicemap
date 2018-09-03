@@ -702,29 +702,29 @@ paths:
           schema:
             $ref: '#/definitions/unit'
       parameters:
-      - name: id
-        in: path
-        type: string
-        description: Unit identifier as defined in unit schema
-        required: true
+        - name: id
+          in: path
+          type: string
+          description: Unit identifier as defined in unit schema
+          required: true
 
   /service/{id}/:
     get:
       summary: Retrieve single service by id
       operationId: Retrieve service
       tags:
-      - service
+        - service
       responses:
         200:
           description: Single service object
           schema:
             $ref: '#/definitions/service'
       parameters:
-      - name: id
-        in: path
-        type: string
-        description: Service identifier as defined in service schema
-        required: true
+        - name: id
+          in: path
+          type: string
+          description: Service identifier as defined in service schema
+          required: true
 
   /service/:
     get:
@@ -760,7 +760,7 @@ paths:
       summary: Retrieve single service node by id. Always prefer the **service** endpoint unless service nodes are specifically required.
       operationId: Retrieve service node
       tags:
-      - service
+        - service
       responses:
         200:
           description: Single service node object
@@ -795,7 +795,7 @@ paths:
           description: The id of a service_node whose descendants are to be returned in the response
       responses:
         200:
-          description: List of service nodess, paginated
+          description: List of service nodes, paginated
           schema:
             type: object
             allOf:
@@ -817,6 +817,18 @@ paths:
         - $ref: "#/parameters/page_param"
         - $ref: "#/parameters/pagesize_param"
         - $ref: "#/parameters/include_param"
+      responses:
+        200:
+          description: List of departments, paginated
+          schema:
+            type: object
+            allOf:
+              - properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/definitions/department'
+              - $ref: '#/definitions/common_collection'
 
   /department/{id}/:
     get:
@@ -826,7 +838,18 @@ paths:
       tags:
         - organization
       parameters:
-        - name: include_hierarchy
+        - name: id
+          in: path
           type: string
-          description: With a value other than *no*, *false*, or *0*, or with an empty value, include the whole descendant hierarchy beginning at this department in the response.
-
+          description: Department uuid
+          required: true
+        - name: include_hierarchy
+          in: query
+          type: string
+          description: With an empty value or any value other than *no*, *false*, or *0*, include the whole descendant hierarchy beginning at this department in the response. Omitting this parameter, or including it with the value *no*, *false*, or *0*, disables expanding the hierarchy.
+      responses:
+        200:
+          description: The requested department
+          schema:
+            $ref: '#/definitions/department'
+          
