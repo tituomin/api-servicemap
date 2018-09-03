@@ -853,3 +853,62 @@ paths:
           schema:
             $ref: '#/definitions/department'
           
+  /search/:
+    get:
+      operationId: Full text search
+      summary: Full text search through units, services, service nodes, and addresses
+      description: Return a heterogeneous list of full text matches for given queries. Supports both full queries and autosuggest queries with partial input.
+      tags:
+        - search
+      parameters:
+        - name: type
+          in: query
+          type: string
+          description: If present, this parameter will restrict the types of resources returned in the results. Possible values are *service_node*, *service*, *unit*, *address*. If not present, the default types are *service*, *unit*, *address*.
+        - name: language
+          in: query
+          type: string
+          description: The two-character ISO 639-1 language code to be used in the search. If missing, the search will use the default language.
+        - name: q
+          in: query
+          type: string
+          description: The complete search query to be used.
+        - name: input
+          in: query
+          type: string
+          description: A partial user input to be used in an autosuggest search
+        - name: municipality
+          in: query
+          type: string
+          description: A comma-separated list of municipalities to be used to filter units. Uses the simple format of lowercase municipality name.
+        - name: service
+          in: query
+          type: string
+          description: A comma-separated list of service ids to be used to filter units.
+        - name: include
+          in: query
+          type: array
+          items:
+            type: string
+          description: Embed the complete content of given reference-type fields directly into the response, otherwise they are returned as identifiers. Separate field names by commas. In the search endpoint, you must qualify the field names with the resource names because many kinds of resources are searched through. For example, instead of **include=department** you must specify **include=unit.department**
+        - name: only
+          in: query
+          type: array
+          items:
+            type: string
+          description: Restrict the field returned in the results. Separate field names by commas. In the search endpoint, you must qualify the field names with the resource names using the format **<resource_type>.<field_name>** because many kinds of resources are searched through. For example, instead of **only=name** you must specify **only=unit.name**
+        - $ref: "#/parameters/page_param"
+        - $ref: "#/parameters/pagesize_param"
+      responses:
+        200:
+          description: List of departments, paginated
+          schema:
+            type: object
+            allOf:
+              - properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/definitions/department'
+              - $ref: '#/definitions/common_collection'
+
