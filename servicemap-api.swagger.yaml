@@ -857,7 +857,7 @@ paths:
     get:
       operationId: Full text search
       summary: Full text search through units, services, service nodes, and addresses
-      description: Return a heterogeneous list of full text matches for given queries. Supports both full queries and autosuggest queries with partial input.
+      description: Return a heterogeneous list of full text matches for given queries. Supports both full queries and autosuggest queries with partial input. If the parameter *q* is used, a complete search will be performed. If the parameter *input* is used, an autosuggest search will be performed.
       tags:
         - search
       parameters:
@@ -910,5 +910,106 @@ paths:
                     type: array
                     items:
                       type: object
-                      description: An object of type *unit*, *service*, *address*, or *service_node*. The field *object_type* reveals the type of the resource. **Note that in this field only, service_node is spelled service node**.
+                      description: An object of type *unit*, *service*, *address*, or *service_node*. The field *object_type* reveals the type of the resource. **Note that in this field only, service_node is spelled servicenode**.
+              - $ref: '#/definitions/common_collection'
+
+  /accessibility_rule/:
+    get:
+      operationId: Retrieve accessibility rule list
+      summary: Retrieve all the accessibility shortcoming evaluating rules and UI messages
+      tags:
+        - accessibility
+      responses:
+        200:
+          description: List of accessibility rules and shorcoming messages
+          schema:
+            $ref: "#/definitions/accessibility_rule"
+
+
+  /street/:
+    get:
+      operationId: Retrieve list of streets
+      summary:  Retrieve list of streets
+      tags:
+        - geography
+      parameters:
+        - name: language
+          in: query
+          type: string
+          description: The two-character ISO 639-1 language code to be used in the street names. If missing, the street name parameter will use the default language.
+        - name: municipality
+          in: query
+          type: string
+          description: A municipality id. The returned addresses will be located within the municipalitie\'s boundaries. The municipality id is either a municipality name in Finnish, or a full OCD ID of the form ocd-division/country\:fi/kunta\:helsinki (URL encoded) See the [OpenCivicData Site](http://opencivicdata.readthedocs.io/en/latest/ocdids.html) for more information
+        - name: input
+          in: query
+          type: string
+          description: An autosuggest search for street names, resulting in a prefix search.
+      responses:
+        200:
+          description: A list of street resources
+          schema:
+            allOf:
+              - properties:
+                  results:
+                    type: array
+                    items:
+                      - $ref: '#/definitions/street'
+              - $ref: '#/definitions/common_collection'
+
+  /street/{id}/:
+    get:
+      operationId: Retrieve a single street resource
+      summary: Retrieve a single street resource
+      tags:
+        - geography
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+          description: Internal id of street. Notice, not persistent. Should only be used when resolving street ids from address resources.
+      responses:
+        200:
+          description: A single street resource
+          schema:
+            $ref: '#/definitions/street'
+
+  /address/:
+    get:
+      operationId: Retrieve a list of addresses
+      summary: Retrieve a list of addresses
+      parameters:
+        - name: language
+          in: query
+          type: string
+          description: The two-character ISO 639-1 language code to be used in the street names of the addresses. If missing, the street name parameter will use the default language.
+        - name: municipality
+          in: query
+          type: string
+          description: A municipality id. The returned addresses will be located within the municipalitie\'s boundaries. The municipality id is either a municipality name in Finnish, or a full OCD ID of the form ocd-division/country\:fi/kunta\:helsinki (URL encoded) See the [OpenCivicData Site](http://opencivicdata.readthedocs.io/en/latest/ocdids.html) for more information
+        - name: municipality_name
+          in: query
+          type: string
+          description: A municipality name to be used as a filter.
+        - name: street
+          in: query
+          type: string
+          description: Filter address by street. If a numeric identifier, the parameter is interpreted as a street resource identifier (id field). If not, it is interpreted as the exact street name, case insensitive.
+        - name: number
+          in: query
+          type: integer
+          description: Filter by the number field of addresses.
+      tags:
+        - geography
+      responses:
+        200:
+          description: List of address resources
+          schema:
+            allOf:
+              - properties:
+                  results:
+                    type: array
+                    items:
+                      - $ref: '#/definitions/address'
               - $ref: '#/definitions/common_collection'
