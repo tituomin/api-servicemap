@@ -896,12 +896,12 @@ paths:
           type: array
           items:
             type: string
-          description: Restrict the field returned in the results. Separate field names by commas. In the search endpoint, you must qualify the field names with the resource names using the format **<resource_type>.<field_name>** because many kinds of resources are searched through. For example, instead of **only=name** you must specify **only=unit.name**
+          description: Restrict the field returned in the results. Separate field names by commas. In the search endpoint, you must qualify the field names with the resource names using the format # **\<resource_type>.<field_name>** because many kinds of resources are searched through. For example, instead of **only=name** you must specify **only=unit.name**
         - $ref: "#/parameters/page_param"
         - $ref: "#/parameters/pagesize_param"
       responses:
         200:
-          description: List of departments, paginated
+          description: List of search results, paginated
           schema:
             type: object
             allOf:
@@ -909,6 +909,6 @@ paths:
                   results:
                     type: array
                     items:
-                      $ref: '#/definitions/department'
+                      type: object
+                      description: An object of type *unit*, *service*, *address*, or *service_node*. The field *object_type* reveals the type of the resource. **Note that in this field only, service_node is spelled service node**.
               - $ref: '#/definitions/common_collection'
-
